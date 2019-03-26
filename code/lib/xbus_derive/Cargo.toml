@@ -1,0 +1,13 @@
+[package]
+name = "xbus_derive"
+version = "0.1.0"
+authors = ["Miro Svrtan <miro@mirosvrtan.me>"]
+edition = "2018"
+
+[lib]
+proc-macro = true
+
+[dependencies]
+quote="*"
+syn="*"
+
