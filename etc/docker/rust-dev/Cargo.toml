@@ -1,0 +1,11 @@
+[package]
+name = "dummy"
+version = "0.1.0"
+authors = ["Miro Svrtan <miro@mirosvrtan.me>"]
+edition = "2018"
+
+[dependencies]
+actix = "0.7"
+futures = "*"
+quote="*"
+syn="*"
