@@ -1,0 +1,13 @@
+version: '3.2'
+services:
+  esdemo_dev:
+    container_name: esdemo_dev
+    build:
+      context: ./etc/docker/rust-dev
+    volumes:
+      - type: bind
+        source: ./code
+        target: /app
+    ports:
+      - "4000:4000"
+    working_dir: /app
