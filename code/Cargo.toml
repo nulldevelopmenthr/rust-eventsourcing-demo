@@ -2,4 +2,6 @@
 
 members = [
     "app",
+    "lib/xbus",
+    "lib/xbus_derive",
 ]
