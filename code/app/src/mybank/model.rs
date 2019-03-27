@@ -12,10 +12,10 @@ pub type CustomerId = u64;
 type Events = Vec<BankAccountEvent>;
 type MaybeState = Option<BankAccountState>;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct BankAccountState {
-    id: BankAccountId,
-    customer_id: CustomerId,
+    pub id: BankAccountId,
+    pub customer_id: CustomerId,
 }
 
 #[derive(Debug)]
