@@ -3,12 +3,12 @@ use super::model::{BankAccountId, CustomerId};
 //
 //     Events
 //
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum BankAccountEvent {
     BankAccountOpened(BankAccountOpened),
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct BankAccountOpened {
     pub id: BankAccountId,
     pub customer_id: CustomerId,
