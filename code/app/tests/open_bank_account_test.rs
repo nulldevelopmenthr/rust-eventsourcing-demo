@@ -20,6 +20,7 @@ fn account_opened_event_will_set_state_correctly() {
     let expected = Ok(BankAccountState {
         id: 100,
         customer_id: 20,
+        balance: 0,
     });
 
     // Act

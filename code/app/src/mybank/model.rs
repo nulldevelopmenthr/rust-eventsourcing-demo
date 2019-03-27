@@ -16,6 +16,7 @@ type MaybeState = Option<BankAccountState>;
 pub struct BankAccountState {
     pub id: BankAccountId,
     pub customer_id: CustomerId,
+    pub balance: u64,
 }
 
 #[derive(Debug)]
@@ -62,6 +63,7 @@ impl BankAccountAggregate {
         BankAccountState {
             id: e.id,
             customer_id: e.customer_id,
+            balance: 0,
         }
     }
 }
