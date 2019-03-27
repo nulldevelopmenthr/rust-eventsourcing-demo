@@ -2,6 +2,8 @@ use super::command::BankAccountCommand;
 use super::command::OpenBankAccountPayload;
 use super::event::BankAccountEvent;
 use super::event::BankAccountOpened;
+use crate::mybank::command::DepositPayload;
+use crate::mybank::event::BankAccountCredited;
 //
 //     Types,models
 //
@@ -26,11 +28,17 @@ impl BankAccountAggregate {
     pub fn handle(command: BankAccountCommand) -> Result<Events, Error> {
         match command {
             BankAccountCommand::OpenBankAccount(payload) => Self::open_acc(payload),
+            BankAccountCommand::Deposit(payload) => Self::deposit(payload),
         }
     }
 
     fn open_acc(input: OpenBankAccountPayload) -> Result<Events, Error> {
         let event = BankAccountEvent::acc_opened(input.id, input.customer_id);
+        Ok(vec![event])
+    }
+
+    fn deposit(input: DepositPayload) -> Result<Events, Error> {
+        let event = BankAccountEvent::credited(input.id, input.amount);
         Ok(vec![event])
     }
 }
@@ -51,9 +59,10 @@ impl BankAccountAggregate {
         }
     }
 
-    fn apply_event(_state: MaybeState, event: &BankAccountEvent) -> Result<MaybeState, Error> {
+    fn apply_event(state: MaybeState, event: &BankAccountEvent) -> Result<MaybeState, Error> {
         let state = match event {
             BankAccountEvent::BankAccountOpened(payload) => Self::account_opened(payload),
+            BankAccountEvent::Credited(payload) => Self::account_credited(state.unwrap(), payload),
         };
 
         Ok(Some(state))
@@ -64,6 +73,14 @@ impl BankAccountAggregate {
             id: e.id,
             customer_id: e.customer_id,
             balance: 0,
+        }
+    }
+
+    fn account_credited(state: BankAccountState, e: &BankAccountCredited) -> BankAccountState {
+        BankAccountState {
+            id: state.id,
+            customer_id: state.customer_id,
+            balance: state.balance + e.amount,
         }
     }
 }
