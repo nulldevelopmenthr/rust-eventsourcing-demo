@@ -11,7 +11,7 @@ fn withdrawing_too_much_money_emits_withdrawal_refused_event() {
     let expected = Ok(vec![BankAccountEvent::withdrawal_refused(100, 90, 49)]);
 
     // Act
-    let result = BankAccountAggregate::handle(withdraw);
+    let result = BankAccountAggregate::handle(None, withdraw);
 
     // Assert
     assert_eq!(expected, result);

@@ -11,7 +11,7 @@ fn withdrawing_money_emits_debited_event() {
     let expected = Ok(vec![BankAccountEvent::debited(100, 9)]);
 
     // Act
-    let result = BankAccountAggregate::handle(withdraw);
+    let result = BankAccountAggregate::handle(None, withdraw);
 
     // Assert
     assert_eq!(expected, result);

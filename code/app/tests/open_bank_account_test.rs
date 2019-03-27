@@ -7,7 +7,7 @@ fn opening_a_bank_account_emits_account_opened_event() {
     let expected = Ok(vec![BankAccountEvent::acc_opened(100, 20)]);
 
     // Act
-    let result = BankAccountAggregate::handle(open_bank_account);
+    let result = BankAccountAggregate::handle(None, open_bank_account);
 
     // Assert
     assert_eq!(expected, result);

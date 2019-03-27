@@ -15,7 +15,8 @@ pub fn main() {
 fn example_open_bank_account() {
     let open_bank_account = BankAccountCommand::open_acc(100, 20);
 
-    let events_result = BankAccountAggregate::handle(open_bank_account);
+    let state = None;
+    let events_result = BankAccountAggregate::handle(state, open_bank_account);
 
     let events = match events_result {
         Ok(events) => events,

@@ -27,7 +27,7 @@ pub struct BankAccountState {
 pub struct BankAccountAggregate;
 
 impl BankAccountAggregate {
-    pub fn handle(command: BankAccountCommand) -> Result<Events, Error> {
+    pub fn handle(state: MaybeState, command: BankAccountCommand) -> Result<Events, Error> {
         match command {
             BankAccountCommand::OpenBankAccount(payload) => Self::open_acc(payload),
             BankAccountCommand::Deposit(payload) => Self::deposit(payload),
