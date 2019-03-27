@@ -8,8 +8,8 @@ DONE:
 
 IN PROGRESS:
 
+ - bank account balance can not be negative
 
 TODO:
 
- - bank account balance can not be negative
  
