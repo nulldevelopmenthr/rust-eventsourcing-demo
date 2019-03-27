@@ -7,6 +7,7 @@ use super::model::{BankAccountId, CustomerId};
 pub enum BankAccountEvent {
     BankAccountOpened(BankAccountOpened),
     Credited(BankAccountCredited),
+    Debited(BankAccountDebited),
 }
 
 #[derive(Debug, PartialEq)]
@@ -16,6 +17,11 @@ pub struct BankAccountOpened {
 }
 #[derive(Debug, PartialEq)]
 pub struct BankAccountCredited {
+    pub id: BankAccountId,
+    pub amount: u64,
+}
+#[derive(Debug, PartialEq)]
+pub struct BankAccountDebited {
     pub id: BankAccountId,
     pub amount: u64,
 }
@@ -29,6 +35,12 @@ impl BankAccountEvent {
     }
     pub fn credited(id: BankAccountId, amount: u64) -> BankAccountEvent {
         BankAccountEvent::Credited(BankAccountCredited {
+            id: id,
+            amount: amount,
+        })
+    }
+    pub fn debited(id: BankAccountId, amount: u64) -> BankAccountEvent {
+        BankAccountEvent::Debited(BankAccountDebited {
             id: id,
             amount: amount,
         })

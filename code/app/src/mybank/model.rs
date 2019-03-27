@@ -3,7 +3,9 @@ use super::command::OpenBankAccountPayload;
 use super::event::BankAccountEvent;
 use super::event::BankAccountOpened;
 use crate::mybank::command::DepositPayload;
+use crate::mybank::command::WithdrawPayload;
 use crate::mybank::event::BankAccountCredited;
+use crate::mybank::event::BankAccountDebited;
 //
 //     Types,models
 //
@@ -29,6 +31,7 @@ impl BankAccountAggregate {
         match command {
             BankAccountCommand::OpenBankAccount(payload) => Self::open_acc(payload),
             BankAccountCommand::Deposit(payload) => Self::deposit(payload),
+            BankAccountCommand::Withdraw(payload) => Self::withdraw(payload),
         }
     }
 
@@ -39,6 +42,11 @@ impl BankAccountAggregate {
 
     fn deposit(input: DepositPayload) -> Result<Events, Error> {
         let event = BankAccountEvent::credited(input.id, input.amount);
+        Ok(vec![event])
+    }
+
+    fn withdraw(input: WithdrawPayload) -> Result<Events, Error> {
+        let event = BankAccountEvent::debited(input.id, input.amount);
         Ok(vec![event])
     }
 }
@@ -63,6 +71,7 @@ impl BankAccountAggregate {
         let state = match event {
             BankAccountEvent::BankAccountOpened(payload) => Self::account_opened(payload),
             BankAccountEvent::Credited(payload) => Self::account_credited(state.unwrap(), payload),
+            BankAccountEvent::Debited(payload) => Self::account_debited(state.unwrap(), payload),
         };
 
         Ok(Some(state))
@@ -81,6 +90,14 @@ impl BankAccountAggregate {
             id: state.id,
             customer_id: state.customer_id,
             balance: state.balance + e.amount,
+        }
+    }
+
+    fn account_debited(state: BankAccountState, e: &BankAccountDebited) -> BankAccountState {
+        BankAccountState {
+            id: state.id,
+            customer_id: state.customer_id,
+            balance: state.balance - e.amount,
         }
     }
 }

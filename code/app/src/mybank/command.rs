@@ -7,6 +7,7 @@ use super::model::{BankAccountId, CustomerId};
 pub enum BankAccountCommand {
     OpenBankAccount(OpenBankAccountPayload),
     Deposit(DepositPayload),
+    Withdraw(WithdrawPayload),
 }
 
 #[derive(Debug)]
@@ -17,6 +18,12 @@ pub struct OpenBankAccountPayload {
 
 #[derive(Debug)]
 pub struct DepositPayload {
+    pub id: BankAccountId,
+    pub amount: u64,
+}
+
+#[derive(Debug)]
+pub struct WithdrawPayload {
     pub id: BankAccountId,
     pub amount: u64,
 }
@@ -37,5 +44,13 @@ impl BankAccountCommand {
         };
 
         BankAccountCommand::Deposit(payload)
+    }
+    pub fn withdraw(id: BankAccountId, amount: u64) -> BankAccountCommand {
+        let payload = WithdrawPayload {
+            id: id,
+            amount: amount,
+        };
+
+        BankAccountCommand::Withdraw(payload)
     }
 }
