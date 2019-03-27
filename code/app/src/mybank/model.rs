@@ -66,7 +66,7 @@ impl BankAccountAggregate {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum Error {
     NoState,
 }
