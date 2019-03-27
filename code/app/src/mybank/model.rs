@@ -31,7 +31,7 @@ impl BankAccountAggregate {
         match command {
             BankAccountCommand::OpenBankAccount(payload) => Self::open_acc(payload),
             BankAccountCommand::Deposit(payload) => Self::deposit(payload),
-            BankAccountCommand::Withdraw(payload) => Self::withdraw(payload),
+            BankAccountCommand::Withdraw(payload) => Self::withdraw(state.unwrap(), payload),
         }
     }
 
@@ -45,8 +45,12 @@ impl BankAccountAggregate {
         Ok(vec![event])
     }
 
-    fn withdraw(input: WithdrawPayload) -> Result<Events, Error> {
-        let event = BankAccountEvent::debited(input.id, input.amount);
+    fn withdraw(state: BankAccountState, input: WithdrawPayload) -> Result<Events, Error> {
+        let event = match state.balance >= input.amount {
+            true => BankAccountEvent::debited(input.id, input.amount),
+            false => BankAccountEvent::withdrawal_refused(input.id, input.amount, state.balance),
+        };
+
         Ok(vec![event])
     }
 }
