@@ -5,3 +5,6 @@ authors = ["Miro Svrtan <miro@mirosvrtan.me>"]
 edition = "2018"
 
 [dependencies]
+
+[lib]
+name = "app"
