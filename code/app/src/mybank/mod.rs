@@ -1,6 +1,7 @@
 mod command;
 mod event;
 mod model;
+pub mod prelude;
 
 use command::BankAccountCommand;
 use model::BankAccountAggregate;
