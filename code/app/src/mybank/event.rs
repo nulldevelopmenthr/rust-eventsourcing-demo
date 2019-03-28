@@ -35,6 +35,7 @@ pub struct BankAccountWithdrawalRefused {
     pub id: BankAccountId,
     pub amount: u64,
     pub balance: u64,
+    pub refused_at: DateTime<Utc>,
 }
 
 impl BankAccountEvent {
@@ -64,6 +65,7 @@ impl BankAccountEvent {
             id: id,
             amount: amount,
             balance: balance,
+            refused_at: Utc::now().round_subsecs(0),
         })
     }
 }
