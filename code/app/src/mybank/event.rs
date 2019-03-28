@@ -1,4 +1,5 @@
 use super::model::{BankAccountId, CustomerId};
+use chrono::prelude::*;
 
 //
 //     Events
@@ -15,6 +16,7 @@ pub enum BankAccountEvent {
 pub struct BankAccountOpened {
     pub id: BankAccountId,
     pub customer_id: CustomerId,
+    pub opened_at: DateTime<Utc>,
 }
 #[derive(Debug, PartialEq)]
 pub struct BankAccountCredited {
@@ -38,6 +40,7 @@ impl BankAccountEvent {
         BankAccountEvent::BankAccountOpened(BankAccountOpened {
             id: id,
             customer_id: customer_id,
+            opened_at: Utc::now().round_subsecs(0),
         })
     }
     pub fn credited(id: BankAccountId, amount: u64) -> BankAccountEvent {
