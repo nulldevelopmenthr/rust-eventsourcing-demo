@@ -22,11 +22,13 @@ pub struct BankAccountOpened {
 pub struct BankAccountCredited {
     pub id: BankAccountId,
     pub amount: u64,
+    pub credited_at: DateTime<Utc>,
 }
 #[derive(Debug, PartialEq)]
 pub struct BankAccountDebited {
     pub id: BankAccountId,
     pub amount: u64,
+    pub debited_at: DateTime<Utc>,
 }
 #[derive(Debug, PartialEq)]
 pub struct BankAccountWithdrawalRefused {
@@ -47,12 +49,14 @@ impl BankAccountEvent {
         BankAccountEvent::Credited(BankAccountCredited {
             id: id,
             amount: amount,
+            credited_at: Utc::now().round_subsecs(0),
         })
     }
     pub fn debited(id: BankAccountId, amount: u64) -> BankAccountEvent {
         BankAccountEvent::Debited(BankAccountDebited {
             id: id,
             amount: amount,
+            debited_at: Utc::now().round_subsecs(0),
         })
     }
     pub fn withdrawal_refused(id: BankAccountId, amount: u64, balance: u64) -> BankAccountEvent {
