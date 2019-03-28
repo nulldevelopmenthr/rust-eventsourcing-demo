@@ -13,3 +13,7 @@ IN PROGRESS:
 
 TODO:
 
+ - add information when bank account was opened
+ - add information when account was credited
+ - add information when account was debited
+ 
