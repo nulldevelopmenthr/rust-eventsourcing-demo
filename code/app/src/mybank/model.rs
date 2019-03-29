@@ -76,7 +76,7 @@ impl BankAccountAggregate {
             BankAccountEvent::BankAccountOpened(payload) => Self::account_opened(payload),
             BankAccountEvent::Credited(payload) => Self::account_credited(state.unwrap(), payload),
             BankAccountEvent::Debited(payload) => Self::account_debited(state.unwrap(), payload),
-            BankAccountEvent::WithdrawalRefused(payload) => state.unwrap(),
+            BankAccountEvent::WithdrawalRefused(_payload) => state.unwrap(),
         };
 
         Ok(Some(new_state))
