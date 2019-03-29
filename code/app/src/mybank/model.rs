@@ -55,7 +55,6 @@ impl BankAccountAggregate {
     }
 }
 
-#[allow(dead_code)]
 impl BankAccountAggregate {
     pub fn apply_events(events: Events) -> Result<BankAccountState, Error> {
         let mut state = None;
