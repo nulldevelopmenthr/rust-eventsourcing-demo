@@ -8,7 +8,8 @@ fn depositing_money_emits_credited_event() {
     let expected = Ok(vec![BankAccountEvent::credited(100, 49)]);
 
     // Act
-    let result = BankAccountAggregate::handle(None, deposit);
+    let initial_state = BankAccountAggregate::apply_events(initial_events).unwrap();
+    let result = BankAccountAggregate::handle(Some(initial_state), deposit);
 
     // Assert
     assert_eq!(expected, result);

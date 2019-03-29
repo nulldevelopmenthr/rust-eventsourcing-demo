@@ -30,7 +30,7 @@ impl BankAccountAggregate {
     pub fn handle(state: MaybeState, command: BankAccountCommand) -> Result<Events, Error> {
         match command {
             BankAccountCommand::OpenBankAccount(payload) => Self::open_acc(payload),
-            BankAccountCommand::Deposit(payload) => Self::deposit(payload),
+            BankAccountCommand::Deposit(payload) => Self::deposit(state.unwrap(), payload),
             BankAccountCommand::Withdraw(payload) => Self::withdraw(state.unwrap(), payload),
         }
     }
@@ -40,7 +40,7 @@ impl BankAccountAggregate {
         Ok(vec![event])
     }
 
-    fn deposit(input: DepositPayload) -> Result<Events, Error> {
+    fn deposit(_state: BankAccountState, input: DepositPayload) -> Result<Events, Error> {
         let event = BankAccountEvent::credited(input.id, input.amount);
         Ok(vec![event])
     }
