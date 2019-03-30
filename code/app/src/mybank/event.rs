@@ -4,7 +4,7 @@ use chrono::prelude::*;
 //
 //     Events
 //
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Copy, Clone)]
 pub enum BankAccountEvent {
     BankAccountOpened(BankAccountOpened),
     Credited(BankAccountCredited),
@@ -12,25 +12,28 @@ pub enum BankAccountEvent {
     WithdrawalRefused(BankAccountWithdrawalRefused),
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Copy, Clone)]
 pub struct BankAccountOpened {
     pub id: BankAccountId,
     pub customer_id: CustomerId,
     pub opened_at: DateTime<Utc>,
 }
-#[derive(Debug, PartialEq)]
+
+#[derive(Debug, PartialEq, Copy, Clone)]
 pub struct BankAccountCredited {
     pub id: BankAccountId,
     pub amount: u64,
     pub credited_at: DateTime<Utc>,
 }
-#[derive(Debug, PartialEq)]
+
+#[derive(Debug, PartialEq, Copy, Clone)]
 pub struct BankAccountDebited {
     pub id: BankAccountId,
     pub amount: u64,
     pub debited_at: DateTime<Utc>,
 }
-#[derive(Debug, PartialEq)]
+
+#[derive(Debug, PartialEq, Copy, Clone)]
 pub struct BankAccountWithdrawalRefused {
     pub id: BankAccountId,
     pub amount: u64,
