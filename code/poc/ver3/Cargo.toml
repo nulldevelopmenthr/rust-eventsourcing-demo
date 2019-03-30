@@ -1,12 +1,11 @@
 [package]
-name = "app"
+name = "ver3"
 version = "0.1.0"
 authors = ["Miro Svrtan <miro@mirosvrtan.me>"]
 edition = "2018"
 
 [dependencies]
 chrono = "0.4"
-ver1 = { path = "../poc/ver1" }
-ver2 = { path = "../poc/ver2" }
-ver3 = { path = "../poc/ver3" }
 
+[lib]
+name = "ver3"
