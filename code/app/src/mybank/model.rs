@@ -13,7 +13,7 @@ use crate::mybank::event::BankAccountDebited;
 pub type BankAccountId = u64;
 pub type CustomerId = u64;
 
-type Events = Vec<BankAccountEvent>;
+pub type Events = Vec<BankAccountEvent>;
 type MaybeState = Option<BankAccountState>;
 
 #[derive(Debug, PartialEq)]
@@ -35,17 +35,17 @@ impl BankAccountAggregate {
         }
     }
 
-    fn open_acc(input: OpenBankAccountPayload) -> Result<Events, Error> {
+    pub fn open_acc(input: OpenBankAccountPayload) -> Result<Events, Error> {
         let event = BankAccountEvent::acc_opened(input.id, input.customer_id);
         Ok(vec![event])
     }
 
-    fn deposit(_state: BankAccountState, input: DepositPayload) -> Result<Events, Error> {
+    pub fn deposit(_state: BankAccountState, input: DepositPayload) -> Result<Events, Error> {
         let event = BankAccountEvent::credited(input.id, input.amount);
         Ok(vec![event])
     }
 
-    fn withdraw(state: BankAccountState, input: WithdrawPayload) -> Result<Events, Error> {
+    pub fn withdraw(state: BankAccountState, input: WithdrawPayload) -> Result<Events, Error> {
         let event = match state.balance >= input.amount {
             true => BankAccountEvent::debited(input.id, input.amount),
             false => BankAccountEvent::withdrawal_refused(input.id, input.amount, state.balance),
@@ -109,4 +109,5 @@ impl BankAccountAggregate {
 #[derive(Debug, PartialEq)]
 pub enum Error {
     NoState,
+    CantSaveEvent,
 }
