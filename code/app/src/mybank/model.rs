@@ -109,4 +109,5 @@ impl BankAccountAggregate {
 #[derive(Debug, PartialEq)]
 pub enum Error {
     NoState,
+    CantSaveEvent,
 }
