@@ -9,20 +9,19 @@ where
 }
 
 impl<T: BankAccountRepository> WithdrawHandler<T> {
-    pub fn handle(&self, command: WithdrawPayload) -> Result<(), Error> {
+    pub fn handle(&self, command: WithdrawPayload) -> Result<(), BankAccountError> {
         let repo = Arc::clone(&self.repository);
 
         let current_events = repo.get_events();
         let initial_state = BankAccountAggregate::apply_events(current_events.unwrap());
 
-        let result: Result<Vec<BankAccountEvent>, Error> =
+        let result: Result<Vec<BankAccountEvent>, BankAccountError> =
             BankAccountAggregate::withdraw(initial_state.unwrap(), command);
 
         let events = result?;
 
-        match repo.save_events(events) {
-            Ok(()) => Ok(()),
-            _ => Err(Error::CantSaveEvent),
-        }
+        let result = repo.save_events(events)?;
+
+        Ok(result)
     }
 }
