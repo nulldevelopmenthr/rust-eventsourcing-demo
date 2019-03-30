@@ -27,7 +27,10 @@ pub struct BankAccountState {
 pub struct BankAccountAggregate;
 
 impl BankAccountAggregate {
-    pub fn handle(state: MaybeState, command: BankAccountCommand) -> Result<Events, Error> {
+    pub fn handle(
+        state: MaybeState,
+        command: BankAccountCommand,
+    ) -> Result<Events, BankAccountError> {
         match command {
             BankAccountCommand::OpenBankAccount(payload) => Self::open_acc(payload),
             BankAccountCommand::Deposit(payload) => Self::deposit(state.unwrap(), payload),
@@ -35,17 +38,23 @@ impl BankAccountAggregate {
         }
     }
 
-    pub fn open_acc(input: OpenBankAccountPayload) -> Result<Events, Error> {
+    pub fn open_acc(input: OpenBankAccountPayload) -> Result<Events, BankAccountError> {
         let event = BankAccountEvent::acc_opened(input.id, input.customer_id);
         Ok(vec![event])
     }
 
-    pub fn deposit(_state: BankAccountState, input: DepositPayload) -> Result<Events, Error> {
+    pub fn deposit(
+        _state: BankAccountState,
+        input: DepositPayload,
+    ) -> Result<Events, BankAccountError> {
         let event = BankAccountEvent::credited(input.id, input.amount);
         Ok(vec![event])
     }
 
-    pub fn withdraw(state: BankAccountState, input: WithdrawPayload) -> Result<Events, Error> {
+    pub fn withdraw(
+        state: BankAccountState,
+        input: WithdrawPayload,
+    ) -> Result<Events, BankAccountError> {
         let event = match state.balance >= input.amount {
             true => BankAccountEvent::debited(input.id, input.amount),
             false => BankAccountEvent::withdrawal_refused(input.id, input.amount, state.balance),
@@ -56,7 +65,7 @@ impl BankAccountAggregate {
 }
 
 impl BankAccountAggregate {
-    pub fn apply_events(events: Events) -> Result<BankAccountState, Error> {
+    pub fn apply_events(events: Events) -> Result<BankAccountState, BankAccountError> {
         let mut state = None;
 
         for event in events {
@@ -66,11 +75,14 @@ impl BankAccountAggregate {
 
         match state {
             Some(state) => Ok(state),
-            None => Err(Error::NoState),
+            None => Err(BankAccountError::NoState),
         }
     }
 
-    fn apply_event(state: MaybeState, event: &BankAccountEvent) -> Result<MaybeState, Error> {
+    fn apply_event(
+        state: MaybeState,
+        event: &BankAccountEvent,
+    ) -> Result<MaybeState, BankAccountError> {
         let new_state = match event {
             BankAccountEvent::BankAccountOpened(payload) => Self::account_opened(payload),
             BankAccountEvent::Credited(payload) => Self::account_credited(state.unwrap(), payload),
@@ -107,7 +119,7 @@ impl BankAccountAggregate {
 }
 
 #[derive(Debug, PartialEq)]
-pub enum Error {
+pub enum BankAccountError {
     NoState,
     CantSaveEvent,
 }

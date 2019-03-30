@@ -9,8 +9,9 @@ where
 }
 
 impl<T: BankAccountRepository> OpenBankAccountHandler<T> {
-    pub fn handle(&self, command: OpenBankAccountPayload) -> Result<(), Error> {
-        let result: Result<Vec<BankAccountEvent>, Error> = BankAccountAggregate::open_acc(command);
+    pub fn handle(&self, command: OpenBankAccountPayload) -> Result<(), BankAccountError> {
+        let result: Result<Vec<BankAccountEvent>, BankAccountError> =
+            BankAccountAggregate::open_acc(command);
 
         let events = result?;
 
@@ -18,7 +19,7 @@ impl<T: BankAccountRepository> OpenBankAccountHandler<T> {
 
         match repo.save_events(events) {
             Ok(()) => Ok(()),
-            _ => Err(Error::CantSaveEvent),
+            _ => Err(BankAccountError::CantSaveEvent),
         }
     }
 }
