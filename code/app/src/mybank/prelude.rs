@@ -1,4 +1,11 @@
 pub use super::command::BankAccountCommand;
+pub use super::command::DepositPayload;
+pub use super::command::OpenBankAccountPayload;
+pub use super::command::WithdrawPayload;
 pub use super::event::BankAccountEvent;
 pub use super::model::BankAccountAggregate;
 pub use super::model::BankAccountState;
+pub use super::model::Error;
+pub use super::open_bank_account::OpenBankAccountHandler;
+pub use super::repository::BankAccountRepository;
+pub use super::repository::BankAccountRepositoryError;
