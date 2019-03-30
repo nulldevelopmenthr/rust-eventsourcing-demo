@@ -20,9 +20,8 @@ impl<T: BankAccountRepository> DepositHandler<T> {
 
         let events = result?;
 
-        match repo.save_events(events) {
-            Ok(()) => Ok(()),
-            _ => Err(BankAccountError::CantSaveEvent),
-        }
+        let result = repo.save_events(events)?;
+
+        Ok(result)
     }
 }

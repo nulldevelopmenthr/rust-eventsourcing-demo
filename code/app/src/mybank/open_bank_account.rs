@@ -17,10 +17,9 @@ impl<T: BankAccountRepository> OpenBankAccountHandler<T> {
 
         let repo = Arc::clone(&self.repository);
 
-        match repo.save_events(events) {
-            Ok(()) => Ok(()),
-            _ => Err(BankAccountError::CantSaveEvent),
-        }
+        let result = repo.save_events(events)?;
+
+        Ok(result)
     }
 }
 
