@@ -1,0 +1,11 @@
+[package]
+name = "ver1"
+version = "0.1.0"
+authors = ["Miro Svrtan <miro@mirosvrtan.me>"]
+edition = "2018"
+
+[dependencies]
+chrono = "0.4"
+
+[lib]
+name = "ver1"
