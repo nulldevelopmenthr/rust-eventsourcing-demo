@@ -13,7 +13,7 @@ use crate::mybank::event::BankAccountDebited;
 pub type BankAccountId = u64;
 pub type CustomerId = u64;
 
-type Events = Vec<BankAccountEvent>;
+pub type Events = Vec<BankAccountEvent>;
 type MaybeState = Option<BankAccountState>;
 
 #[derive(Debug, PartialEq)]
