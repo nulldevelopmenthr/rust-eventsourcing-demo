@@ -1,11 +1,16 @@
-use crate::mybank::event::BankAccountEvent;
-use crate::mybank::model::BankAccountError;
+use super::event::BankAccountEvent;
+use super::model::BankAccountAggregate;
+use super::model::BankAccountError;
+use super::model::BankAccountId;
 use std::sync::Mutex;
 use std::{error::Error, fmt};
 
 pub trait BankAccountRepository {
     fn get_events(&self) -> Result<Vec<BankAccountEvent>, BankAccountRepositoryError>;
     fn save_events(&self, events: Vec<BankAccountEvent>) -> Result<(), BankAccountRepositoryError>;
+
+    fn load(&self, id: BankAccountId) -> Result<BankAccountAggregate, BankAccountError>;
+    fn save(&self, agg: BankAccountAggregate) -> Result<(), BankAccountError>;
 }
 
 pub struct InMemoryBankAccountRepository {
@@ -39,11 +44,27 @@ impl BankAccountRepository for InMemoryBankAccountRepository {
 
         Ok(values)
     }
+    fn load(&self, _id: BankAccountId) -> Result<BankAccountAggregate, BankAccountError> {
+        let events = self.get_events()?;
+
+        let mut z = BankAccountAggregate::new();
+
+        z.apply_events(events)?;
+
+        Ok(z)
+    }
+
+    fn save(&self, agg: BankAccountAggregate) -> Result<(), BankAccountError> {
+        self.save_events(agg.new_events)?;
+
+        Ok(())
+    }
 }
 
 #[derive(Debug, PartialEq)]
 pub enum BankAccountRepositoryError {
     Unexpected,
+    NotImplemented,
 }
 
 impl Error for BankAccountRepositoryError {}
@@ -53,6 +74,7 @@ impl fmt::Display for BankAccountRepositoryError {
         write!(f, "BankAccountRepositoryError: :(")
     }
 }
+
 impl From<BankAccountRepositoryError> for BankAccountError {
     fn from(_err: BankAccountRepositoryError) -> BankAccountError {
         BankAccountError::CantSaveEvent

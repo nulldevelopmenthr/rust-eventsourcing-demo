@@ -1,24 +1,15 @@
-mod command;
-mod deposit;
-mod event;
-mod model;
-mod open_bank_account;
-pub mod prelude;
-mod repository;
-mod withdraw;
-
-use crate::mybank::command::DepositPayload;
-use crate::mybank::command::OpenBankAccountPayload;
-use crate::mybank::command::WithdrawPayload;
-use crate::mybank::deposit::DepositHandler;
-use crate::mybank::event::BankAccountEvent;
-use crate::mybank::open_bank_account::OpenBankAccountHandler;
-use crate::mybank::repository::BankAccountRepository;
-use crate::mybank::repository::InMemoryBankAccountRepository;
-use crate::mybank::withdraw::WithdrawHandler;
+use crate::command::DepositPayload;
+use crate::command::OpenBankAccountPayload;
+use crate::command::WithdrawPayload;
+use crate::deposit::DepositHandler;
+use crate::event::BankAccountEvent;
+use crate::open_bank_account::OpenBankAccountHandler;
+use crate::repository::BankAccountRepository;
+use crate::repository::InMemoryBankAccountRepository;
+use crate::withdraw::WithdrawHandler;
 use std::sync::Arc;
 
-pub fn main() {
+pub fn examples() {
     example_open_bank_account();
     example_deposit_money();
     example_withdraw_money();

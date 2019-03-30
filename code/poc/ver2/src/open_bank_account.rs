@@ -10,22 +10,19 @@ where
 
 impl<T: BankAccountRepository> OpenBankAccountHandler<T> {
     pub fn handle(&self, command: OpenBankAccountPayload) -> Result<(), BankAccountError> {
-        let result: Result<Vec<BankAccountEvent>, BankAccountError> =
-            BankAccountAggregate::open_acc(command);
-
-        let events = result?;
+        let agg: BankAccountAggregate = BankAccountAggregate::open_acc(command)?;
 
         let repo = Arc::clone(&self.repository);
 
-        let result = repo.save_events(events)?;
+        let _result = repo.save(agg)?;
 
-        Ok(result)
+        Ok(())
     }
 }
 
 #[test]
 fn open_bank_account_handler() {
-    let repo = std::sync::Arc::new(TestBankAccountRepository {});
+    let repo = Arc::new(TestBankAccountRepository {});
     let handler = OpenBankAccountHandler { repository: repo };
 
     let result = handler.handle(OpenBankAccountPayload {
@@ -48,7 +45,18 @@ impl BankAccountRepository for TestBankAccountRepository {
             false => Err(BankAccountRepositoryError::Unexpected),
         }
     }
+
     fn get_events(&self) -> Result<Vec<BankAccountEvent>, BankAccountRepositoryError> {
-        Ok(Vec::new())
+        unimplemented!()
+    }
+
+    fn load(&self, _id: BankAccountId) -> Result<BankAccountAggregate, BankAccountError> {
+        unimplemented!()
+    }
+
+    fn save(&self, agg: BankAccountAggregate) -> Result<(), BankAccountError> {
+        self.save_events(agg.new_events)?;
+
+        Ok(())
     }
 }
