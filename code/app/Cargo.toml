@@ -8,5 +8,3 @@ edition = "2018"
 chrono = "0.4"
 ver1 = { path = "../poc/ver1" }
 
-[lib]
-name = "app"

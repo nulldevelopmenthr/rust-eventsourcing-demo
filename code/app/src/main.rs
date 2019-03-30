@@ -1,6 +1,5 @@
 #![allow(dead_code)]
 
-mod mybank;
 extern crate ver1;
 
 fn main() {
