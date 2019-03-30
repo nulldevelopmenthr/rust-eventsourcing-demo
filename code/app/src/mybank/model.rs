@@ -6,6 +6,8 @@ use crate::mybank::command::DepositPayload;
 use crate::mybank::command::WithdrawPayload;
 use crate::mybank::event::BankAccountCredited;
 use crate::mybank::event::BankAccountDebited;
+use std::{error::Error, fmt};
+
 //
 //     Types,models
 //
@@ -122,4 +124,12 @@ impl BankAccountAggregate {
 pub enum BankAccountError {
     NoState,
     CantSaveEvent,
+}
+
+impl Error for BankAccountError {}
+
+impl fmt::Display for BankAccountError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "BankAccountError: Oh no, something bad went down")
+    }
 }

@@ -1,5 +1,6 @@
 use crate::mybank::event::BankAccountEvent;
 use std::sync::Mutex;
+use std::{error::Error, fmt};
 
 pub trait BankAccountRepository {
     fn get_events(&self) -> Result<Vec<BankAccountEvent>, BankAccountRepositoryError>;
@@ -42,4 +43,12 @@ impl BankAccountRepository for InMemoryBankAccountRepository {
 #[derive(Debug, PartialEq)]
 pub enum BankAccountRepositoryError {
     Unexpected,
+}
+
+impl Error for BankAccountRepositoryError {}
+
+impl fmt::Display for BankAccountRepositoryError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "BankAccountRepositoryError: :(")
+    }
 }
