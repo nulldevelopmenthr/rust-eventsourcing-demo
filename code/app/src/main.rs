@@ -1,5 +1,3 @@
-#![allow(dead_code)]
-
 extern crate ver1;
 
 fn main() {
