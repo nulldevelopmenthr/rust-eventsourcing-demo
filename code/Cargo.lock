@@ -43,6 +43,7 @@ version = "0.1.0"
 dependencies = [
  "chrono 0.4.6 (registry+https://github.com/rust-lang/crates.io-index)",
  "ver1 0.1.0",
+ "ver2 0.1.0",
 ]
 
 [[package]]
@@ -997,6 +998,13 @@ dependencies = [
 
 [[package]]
 name = "ver1"
+version = "0.1.0"
+dependencies = [
+ "chrono 0.4.6 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "ver2"
 version = "0.1.0"
 dependencies = [
  "chrono 0.4.6 (registry+https://github.com/rust-lang/crates.io-index)",
