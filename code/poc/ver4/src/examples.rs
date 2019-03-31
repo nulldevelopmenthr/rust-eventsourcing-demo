@@ -25,7 +25,7 @@ fn example_open_bank_account() {
 
     let result = handler.handle(OpenBankAccount::new(100, 20));
 
-    println!("{:?}", &event_store.get_events(1));
+    println!("{:?}", &event_store.get_events(100));
 
     match result {
         Ok(()) => println!("Bank account opened"),
@@ -42,7 +42,7 @@ fn example_deposit_money() {
 
     let result = handler.handle(DepositMoney::new(100, 10));
 
-    println!("{:?}", &event_store.get_events(1));
+    println!("{:?}", &event_store.get_events(100));
 
     match result {
         Ok(()) => println!("Money deposited"),
@@ -61,7 +61,7 @@ fn example_withdraw_money() {
 
     let result = handler.handle(WithdrawMoney::new(100, 40));
 
-    println!("{:?}", &event_store.get_events(1));
+    println!("{:?}", &event_store.get_events(100));
 
     match result {
         Ok(()) => println!("Money withdrawn"),
@@ -80,7 +80,7 @@ fn example_withdraw_refused() {
 
     let result = handler.handle(WithdrawMoney::new(100, 50));
 
-    println!("{:?}", &event_store.get_events(1));
+    println!("{:?}", &event_store.get_events(100));
 
     match result {
         Ok(()) => println!("Money withdrawal refused"),
