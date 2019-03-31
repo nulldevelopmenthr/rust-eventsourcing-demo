@@ -6,4 +6,5 @@ members = [
     "lib/xbus_derive",
     "poc/ver1",
     "poc/ver2",
+    "poc/ver3",
 ]
