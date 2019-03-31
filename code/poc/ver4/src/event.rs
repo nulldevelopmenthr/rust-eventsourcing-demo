@@ -12,6 +12,17 @@ pub enum BankAccountEvent {
     WithdrawalRefused(BankAccountWithdrawalRefused),
 }
 
+impl BankAccountEvent {
+    pub fn get_aggregate_id(&self) -> u64 {
+        match &self {
+            BankAccountEvent::BankAccountOpened(payload) => payload.id,
+            BankAccountEvent::Credited(payload) => payload.id,
+            BankAccountEvent::Debited(payload) => payload.id,
+            BankAccountEvent::WithdrawalRefused(payload) => payload.id,
+        }
+    }
+}
+
 #[derive(Debug, PartialEq, Copy, Clone)]
 pub struct BankAccountOpened {
     pub id: BankAccountId,

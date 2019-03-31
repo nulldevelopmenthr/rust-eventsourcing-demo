@@ -25,11 +25,13 @@ impl InMemoryBankAccountEventStore {
 }
 
 impl BankAccountEventStore for InMemoryBankAccountEventStore {
-    fn get_events(&self, _id: BankAccountId) -> GetEventsResult {
+    fn get_events(&self, id: BankAccountId) -> GetEventsResult {
         let m_entities = self.events.lock().unwrap();
         let mut values = Vec::new();
         for value in m_entities.iter() {
-            values.push((*value).clone());
+            if id == value.get_aggregate_id() {
+                values.push((*value).clone());
+            }
         }
 
         Ok(values)
@@ -61,5 +63,34 @@ impl fmt::Display for BankAccountEventStoreError {
 impl From<BankAccountEventStoreError> for BankAccountError {
     fn from(_err: BankAccountEventStoreError) -> BankAccountError {
         BankAccountError::CantSaveEvent
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::event_store::{BankAccountEventStore, InMemoryBankAccountEventStore};
+    use crate::prelude::BankAccountEvent;
+
+    #[test]
+    fn check_get_events_returns_only_events_with_expected_id() {
+        // Arrange
+        let event_store = InMemoryBankAccountEventStore::new();
+
+        let events = vec![
+            BankAccountEvent::acc_opened(100, 20),
+            BankAccountEvent::acc_opened(101, 20),
+        ];
+        let expected = vec![BankAccountEvent::acc_opened(100, 20)];
+
+        match event_store.save_events(events) {
+            Ok(_) => println!("Events saved"),
+            Err(_) => panic!("Cant save events"),
+        }
+
+        // Act
+        let result = event_store.get_events(100).unwrap();
+
+        // Assert
+        assert_eq!(expected, result);
     }
 }
