@@ -21,6 +21,16 @@ pub struct BankAccountState {
     pub balance: u64,
 }
 
+impl BankAccountState {
+    pub fn new(id: BankAccountId, customer_id: CustomerId) -> BankAccountState {
+        BankAccountState {
+            id: id,
+            customer_id: customer_id,
+            balance: 0,
+        }
+    }
+}
+
 #[derive(Debug)]
 pub struct BankAccountAggregate {
     state: MaybeState,
@@ -106,12 +116,7 @@ impl BankAccountAggregate {
     }
 
     fn account_opened(&mut self, e: &BankAccountOpened) -> OkOrError {
-        self.state = Some(BankAccountState {
-            id: e.id,
-            customer_id: e.customer_id,
-            balance: 0,
-        });
-
+        self.state = Some(BankAccountState::new(e.id, e.customer_id));
         Ok(())
     }
 
