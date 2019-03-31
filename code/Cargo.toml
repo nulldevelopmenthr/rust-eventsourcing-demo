@@ -7,4 +7,5 @@ members = [
     "poc/ver1",
     "poc/ver2",
     "poc/ver3",
+    "poc/ver4",
 ]

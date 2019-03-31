@@ -9,4 +9,5 @@ chrono = "0.4"
 ver1 = { path = "../poc/ver1" }
 ver2 = { path = "../poc/ver2" }
 ver3 = { path = "../poc/ver3" }
+ver4 = { path = "../poc/ver4" }
 
