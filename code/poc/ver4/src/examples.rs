@@ -14,6 +14,7 @@ pub fn examples() {
     example_open_bank_account();
     example_deposit_money();
     example_withdraw_money();
+    example_withdraw_refused();
 
     println!("Done!");
 }
@@ -65,6 +66,25 @@ fn example_withdraw_money() {
     match result {
         Ok(()) => println!("Money withdrawn"),
         _ => panic!("Withdrawing failed"),
+    }
+}
+
+fn example_withdraw_refused() {
+    let initial_events = vec![
+        BankAccountEvent::acc_opened(100, 20),
+        BankAccountEvent::credited(100, 49),
+    ];
+    let (repo, event_store) = build_repo(initial_events);
+
+    let handler = WithdrawHandler::new(repo);
+
+    let result = handler.handle(WithdrawMoney::new(100, 50));
+
+    println!("{:?}", &event_store.get_events(1));
+
+    match result {
+        Ok(()) => println!("Money withdrawal refused"),
+        _ => panic!("Withdrawal refusing failed"),
     }
 }
 
