@@ -44,6 +44,13 @@ impl BankAccountAggregate {
             new_events: Vec::new(),
         }
     }
+    fn get_state(&mut self) -> Result<&mut BankAccountState, BankAccountError> {
+        if let Some(state) = &mut self.state {
+            Ok(state)
+        } else {
+            Err(BankAccountError::NoState)
+        }
+    }
 }
 
 // This should be probably moved to 'generic' Aggregate
@@ -88,20 +95,16 @@ impl BankAccountAggregate {
     }
 
     pub fn withdraw(&mut self, input: WithdrawMoney) -> OkOrError {
-        if let Some(state) = &mut self.state {
-            let event = match state.balance >= input.amount {
-                true => BankAccountEvent::debited(input.id, input.amount),
-                false => {
-                    BankAccountEvent::withdrawal_refused(input.id, input.amount, state.balance)
-                }
-            };
+        let state = self.get_state()?;
 
-            self.record_event(event)?;
+        let event = match state.balance >= input.amount {
+            true => BankAccountEvent::debited(input.id, input.amount),
+            false => BankAccountEvent::withdrawal_refused(input.id, input.amount, state.balance),
+        };
 
-            Ok(())
-        } else {
-            Err(BankAccountError::NoState)
-        }
+        self.record_event(event)?;
+
+        Ok(())
     }
 }
 
@@ -121,21 +124,15 @@ impl BankAccountAggregate {
     }
 
     fn account_credited(&mut self, e: &BankAccountCredited) -> OkOrError {
-        if let Some(current_state) = &mut self.state {
-            current_state.balance += e.amount;
-            Ok(())
-        } else {
-            Err(BankAccountError::NoState)
-        }
+        let state = self.get_state()?;
+        state.balance += e.amount;
+        Ok(())
     }
 
     fn account_debited(&mut self, e: &BankAccountDebited) -> OkOrError {
-        if let Some(current_state) = &mut self.state {
-            current_state.balance -= e.amount;
-            Ok(())
-        } else {
-            Err(BankAccountError::NoState)
-        }
+        let state = self.get_state()?;
+        state.balance -= e.amount;
+        Ok(())
     }
 }
 
