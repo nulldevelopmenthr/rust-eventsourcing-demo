@@ -8,4 +8,5 @@ members = [
     "poc/ver2",
     "poc/ver3",
     "poc/ver4",
+    "eventsourcing",
 ]
