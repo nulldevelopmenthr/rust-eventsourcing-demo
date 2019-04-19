@@ -200,6 +200,9 @@ version = "0.1.0"
 [[package]]
 name = "example-banking"
 version = "0.1.0"
+dependencies = [
+ "eventsourcing 0.1.0",
+]
 
 [[package]]
 name = "failure"
