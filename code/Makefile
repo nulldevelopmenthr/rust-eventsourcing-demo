@@ -16,7 +16,8 @@ format:
 	time -p cargo fmt
 
 run:
-	time -p cargo run
+	#time -p cargo run
+	time -p cargo run --bin example-banking
 
 test:
 	#time -p cargo test --tests
