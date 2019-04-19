@@ -19,7 +19,9 @@ run:
 	time -p cargo run
 
 test:
-	time -p cargo test --tests
+	#time -p cargo test --tests
+	cd eventsourcing/ && time -p cargo test --tests
+	cd example-banking/ && time -p cargo test --tests
 
 wip:
 	git add . && git commit -am 'wip' && make build
