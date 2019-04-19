@@ -9,4 +9,5 @@ members = [
     "poc/ver3",
     "poc/ver4",
     "eventsourcing",
+    "example-banking"
 ]
