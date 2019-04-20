@@ -34,7 +34,6 @@ impl AggregateCommand<BankAccountAggregate> for DepositMoney {
 
 #[cfg(test)]
 mod tests {
-    use crate::bank::account::errors::CommandError;
     use crate::bank::account::prelude::{
         BankAccountAggregate, BankAccountEvent, BankAccountState, DepositMoney,
     };
@@ -43,7 +42,7 @@ mod tests {
     #[test]
     fn depositing_money_works() {
         // Arrange
-        let mut agg = BankAccountAggregate::Opened(BankAccountState::new(123, 5000));
+        let agg = BankAccountAggregate::Opened(BankAccountState::new(123, 5000));
         let cmd = DepositMoney::new(123, 49);
         let expected_events = vec![BankAccountEvent::credited(123, 49)];
 

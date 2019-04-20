@@ -4,6 +4,7 @@ mod events;
 mod open_bank_account;
 pub mod prelude;
 mod types;
+mod withdraw_money;
 use eventsourcing::Aggregate;
 use types::{BankAccountId, CustomerId};
 
