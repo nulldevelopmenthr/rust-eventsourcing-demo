@@ -1,3 +1,4 @@
+mod deposit_money;
 mod errors;
 mod events;
 mod open_bank_account;

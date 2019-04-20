@@ -6,11 +6,15 @@ use eventsourcing::{AggregateEvent, Event};
 #[derive(Debug, PartialEq)]
 pub enum BankAccountEvent {
     Opened(Opened),
+    Credited(Credited),
 }
 
 impl BankAccountEvent {
     pub fn opened(id: BankAccountId, customer_id: CustomerId) -> BankAccountEvent {
         BankAccountEvent::Opened(Opened { id, customer_id })
+    }
+    pub fn credited(id: BankAccountId, amount: u64) -> BankAccountEvent {
+        BankAccountEvent::Credited(Credited { id, amount })
     }
 }
 
@@ -18,6 +22,7 @@ impl Event for BankAccountEvent {
     fn event_type(&self) -> &'static str {
         match *self {
             BankAccountEvent::Opened(ref evt) => evt.event_type(),
+            BankAccountEvent::Credited(ref evt) => evt.event_type(),
         }
     }
 }
@@ -27,6 +32,7 @@ impl AggregateEvent<BankAccountAggregate> for BankAccountEvent {
     fn apply_to(self, aggregate: &mut BankAccountAggregate) -> Result<(), Self::Error> {
         match self {
             BankAccountEvent::Opened(evt) => evt.apply_to(aggregate),
+            BankAccountEvent::Credited(evt) => evt.apply_to(aggregate),
         }
     }
 }
@@ -52,6 +58,30 @@ impl AggregateEvent<BankAccountAggregate> for Opened {
             Ok(())
         } else {
             Err(EventError::AlreadyOpened)
+        }
+    }
+}
+
+#[derive(Debug, PartialEq)]
+pub struct Credited {
+    pub id: BankAccountId,
+    pub amount: u64,
+}
+
+impl Event for Credited {
+    fn event_type(&self) -> &'static str {
+        "credited"
+    }
+}
+
+impl AggregateEvent<BankAccountAggregate> for Credited {
+    type Error = EventError;
+    fn apply_to(self, aggregate: &mut BankAccountAggregate) -> Result<(), Self::Error> {
+        if let BankAccountAggregate::Opened(ref mut data) = aggregate {
+            data.balance += self.amount;
+            Ok(())
+        } else {
+            Err(EventError::NotInitialized)
         }
     }
 }
@@ -88,6 +118,24 @@ mod tests {
 
         // Assert
         assert_eq!(expected_error, result);
+    }
+
+    #[test]
+    fn bank_account_credited() {
+        // Arrange
+        let mut agg = BankAccountAggregate::Opened(BankAccountState::new(123, 5000));
+        let event = BankAccountEvent::credited(123, 49);
+        let expected_balance = 49;
+
+        // Act
+        agg.apply(event).unwrap();
+
+        // Assert
+        if let BankAccountAggregate::Opened(state) = agg {
+            assert_eq!(expected_balance, state.balance);
+        } else {
+            panic!("Aggregate not in Opened state");
+        }
     }
 
 }

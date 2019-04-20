@@ -4,11 +4,13 @@ use std::fmt;
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum CommandError {
     AlreadyCreated,
+    NotOpened,
 }
 
 impl error::Error for CommandError {
     fn description(&self) -> &str {
         match *self {
+            CommandError::NotOpened => "attempt to execute command on account that is not opened",
             CommandError::AlreadyCreated => "attempt to create when already created",
         }
     }
@@ -24,11 +26,13 @@ impl fmt::Display for CommandError {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum EventError {
     AlreadyOpened,
+    NotInitialized,
 }
 
 impl error::Error for EventError {
     fn description(&self) -> &str {
         match *self {
+            EventError::NotInitialized => "attempt to execute event before creation",
             EventError::AlreadyOpened => "attempt to open when already opened",
         }
     }
