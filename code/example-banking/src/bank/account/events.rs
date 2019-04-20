@@ -9,6 +9,8 @@ pub enum BankAccountEvent {
     Credited(Credited),
     Debited(Debited),
     NotEnoughFunds(NotEnoughFunds),
+    Closed(Closed),
+    ClosingFailedDueToFundsAvailable(ClosingFailedDueToFundsAvailable),
 }
 
 impl BankAccountEvent {
@@ -32,6 +34,18 @@ impl BankAccountEvent {
             current_balance,
         })
     }
+    pub fn closed(id: BankAccountId) -> BankAccountEvent {
+        BankAccountEvent::Closed(Closed { id })
+    }
+    pub fn closing_failed_due_to_funds_available(
+        id: BankAccountId,
+        current_balance: u64,
+    ) -> BankAccountEvent {
+        BankAccountEvent::ClosingFailedDueToFundsAvailable(ClosingFailedDueToFundsAvailable {
+            id,
+            current_balance,
+        })
+    }
 }
 
 impl Event for BankAccountEvent {
@@ -41,6 +55,8 @@ impl Event for BankAccountEvent {
             BankAccountEvent::Credited(ref evt) => evt.event_type(),
             BankAccountEvent::Debited(ref evt) => evt.event_type(),
             BankAccountEvent::NotEnoughFunds(ref evt) => evt.event_type(),
+            BankAccountEvent::Closed(ref evt) => evt.event_type(),
+            BankAccountEvent::ClosingFailedDueToFundsAvailable(ref evt) => evt.event_type(),
         }
     }
 }
@@ -53,6 +69,8 @@ impl AggregateEvent<BankAccountAggregate> for BankAccountEvent {
             BankAccountEvent::Credited(evt) => evt.apply_to(aggregate),
             BankAccountEvent::Debited(evt) => evt.apply_to(aggregate),
             BankAccountEvent::NotEnoughFunds(evt) => evt.apply_to(aggregate),
+            BankAccountEvent::Closed(evt) => evt.apply_to(aggregate),
+            BankAccountEvent::ClosingFailedDueToFundsAvailable(evt) => evt.apply_to(aggregate),
         }
     }
 }
@@ -129,6 +147,7 @@ impl AggregateEvent<BankAccountAggregate> for Debited {
         }
     }
 }
+
 #[derive(Debug, PartialEq)]
 pub struct NotEnoughFunds {
     pub id: BankAccountId,
@@ -138,7 +157,7 @@ pub struct NotEnoughFunds {
 
 impl Event for NotEnoughFunds {
     fn event_type(&self) -> &'static str {
-        "debited"
+        "not_enough_funds"
     }
 }
 
@@ -149,6 +168,52 @@ impl AggregateEvent<BankAccountAggregate> for NotEnoughFunds {
             Ok(())
         } else {
             Err(EventError::NotInitialized)
+        }
+    }
+}
+
+#[derive(Debug, PartialEq)]
+pub struct Closed {
+    pub id: BankAccountId,
+}
+
+impl Event for Closed {
+    fn event_type(&self) -> &'static str {
+        "closed"
+    }
+}
+
+impl AggregateEvent<BankAccountAggregate> for Closed {
+    type Error = EventError;
+    fn apply_to(self, aggregate: &mut BankAccountAggregate) -> Result<(), Self::Error> {
+        if let BankAccountAggregate::Opened(ref data) = aggregate {
+            *aggregate = BankAccountAggregate::Closed(data.to_owned());
+            Ok(())
+        } else {
+            Err(EventError::AlreadyOpened)
+        }
+    }
+}
+
+#[derive(Debug, PartialEq)]
+pub struct ClosingFailedDueToFundsAvailable {
+    pub id: BankAccountId,
+    pub current_balance: u64,
+}
+
+impl Event for ClosingFailedDueToFundsAvailable {
+    fn event_type(&self) -> &'static str {
+        "closing_failed_due_to_funds_available"
+    }
+}
+
+impl AggregateEvent<BankAccountAggregate> for ClosingFailedDueToFundsAvailable {
+    type Error = EventError;
+    fn apply_to(self, aggregate: &mut BankAccountAggregate) -> Result<(), Self::Error> {
+        if let BankAccountAggregate::Opened(ref mut _data) = aggregate {
+            Ok(())
+        } else {
+            Err(EventError::NotOpened)
         }
     }
 }
@@ -246,4 +311,44 @@ mod tests {
         }
     }
 
+    #[test]
+    fn closing_bank_account() {
+        // Arrange
+        let mut agg = BankAccountAggregate::Opened(BankAccountState::new(123, 5000));
+        let event = BankAccountEvent::closed(123);
+        let expected_balance = 0;
+
+        // Act
+        agg.apply(event).unwrap();
+
+        // Assert
+        if let BankAccountAggregate::Closed(state) = agg {
+            assert_eq!(expected_balance, state.balance);
+        } else {
+            panic!("Aggregate not in Closed state");
+        }
+    }
+
+    #[test]
+    fn closing_not_possible_due_to_funds_available() {
+        // Arrange
+        let mut agg = BankAccountAggregate::Opened(BankAccountState::new(123, 5000));
+        let events = vec![
+            BankAccountEvent::credited(123, 49),
+            BankAccountEvent::closing_failed_due_to_funds_available(123, 49),
+        ];
+        let expected_balance = 49;
+
+        // Act
+        for event in events {
+            agg.apply(event).unwrap();
+        }
+
+        // Assert
+        if let BankAccountAggregate::Opened(state) = agg {
+            assert_eq!(expected_balance, state.balance);
+        } else {
+            panic!("Aggregate not in Opened state");
+        }
+    }
 }

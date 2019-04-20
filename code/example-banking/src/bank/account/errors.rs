@@ -27,6 +27,7 @@ impl fmt::Display for CommandError {
 pub enum EventError {
     AlreadyOpened,
     NotInitialized,
+    NotOpened,
 }
 
 impl error::Error for EventError {
@@ -34,6 +35,7 @@ impl error::Error for EventError {
         match *self {
             EventError::NotInitialized => "attempt to execute event before creation",
             EventError::AlreadyOpened => "attempt to open when already opened",
+            EventError::NotOpened => "attempt to closed when not opened",
         }
     }
 }

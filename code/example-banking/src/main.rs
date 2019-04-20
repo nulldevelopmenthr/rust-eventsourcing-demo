@@ -8,6 +8,7 @@ fn main() {
     deposit_example();
     withdraw_example();
     not_enough_funds_example();
+    close_example();
     println!("Done!");
 }
 
@@ -90,5 +91,26 @@ fn not_enough_funds_example() {
         assert_eq!(expected_balance, state.balance);
     } else {
         panic!("Aggregate not in Opened state");
+    }
+}
+
+fn close_example() {
+    // Arrange
+    let mut agg = BankAccountAggregate::Opened(BankAccountState::new(123, 5000));
+    let cmd = CloseBankAccount::new(123);
+    let expected_balance = 0;
+
+    // Act
+    let events = agg.execute(cmd).unwrap();
+
+    for event in events {
+        agg.apply(event).unwrap();
+    }
+
+    // Assert
+    if let BankAccountAggregate::Closed(state) = agg {
+        assert_eq!(expected_balance, state.balance);
+    } else {
+        panic!("Aggregate not in Closed state");
     }
 }

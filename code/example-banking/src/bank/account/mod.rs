@@ -1,3 +1,4 @@
+mod close_bank_account;
 mod deposit_money;
 mod errors;
 mod events;
@@ -28,6 +29,7 @@ impl BankAccountState {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum BankAccountAggregate {
     Opened(BankAccountState),
+    Closed(BankAccountState),
     Uninitialized,
 }
 
