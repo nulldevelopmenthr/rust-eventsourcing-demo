@@ -1,7 +1,10 @@
+pub mod eventstore;
+
 use std::fmt;
 
 pub trait Aggregate: Default {
     fn aggregate_type() -> &'static str;
+    fn increment_generation(&mut self);
 
     fn execute<C>(&self, command: C) -> Result<C::Events, C::Error>
     where
@@ -14,7 +17,9 @@ pub trait Aggregate: Default {
     where
         E: AggregateEvent<Self>,
     {
-        event.apply_to(self)
+        let result = event.apply_to(self);
+        self.increment_generation();
+        result
     }
 }
 

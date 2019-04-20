@@ -23,7 +23,7 @@ impl AggregateCommand<BankAccountAggregate> for WithdrawMoney {
     type Events = Vec<Self::Event>;
 
     fn execute_on(self, aggregate: &BankAccountAggregate) -> Result<Self::Events, Self::Error> {
-        if let BankAccountAggregate::Opened(ref data) = aggregate {
+        if let BankAccountAggregate::Opened(ref data, _) = aggregate {
             if data.balance >= self.amount {
                 Ok(vec![BankAccountEvent::debited(self.id, self.amount)])
             } else {
@@ -49,7 +49,7 @@ mod tests {
     #[test]
     fn withdrawing_money_works() {
         // Arrange
-        let mut agg = BankAccountAggregate::Opened(BankAccountState::new(123, 5000));
+        let mut agg = BankAccountAggregate::Opened(BankAccountState::new(123, 5000), Vec::new());
         agg.apply(BankAccountEvent::credited(123, 50)).unwrap();
         let cmd = WithdrawMoney::new(123, 49);
         let expected_events = vec![BankAccountEvent::debited(123, 49)];
@@ -64,7 +64,7 @@ mod tests {
     #[test]
     fn not_enough_funds() {
         // Arrange
-        let mut agg = BankAccountAggregate::Opened(BankAccountState::new(123, 5000));
+        let mut agg = BankAccountAggregate::Opened(BankAccountState::new(123, 5000), Vec::new());
         agg.apply(BankAccountEvent::credited(123, 48)).unwrap();
         let cmd = WithdrawMoney::new(123, 49);
         let expected_events = vec![BankAccountEvent::not_enough_funds(123, 49, 48)];

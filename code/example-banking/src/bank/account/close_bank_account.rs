@@ -22,7 +22,7 @@ impl AggregateCommand<BankAccountAggregate> for CloseBankAccount {
     type Events = Vec<Self::Event>;
 
     fn execute_on(self, aggregate: &BankAccountAggregate) -> Result<Self::Events, Self::Error> {
-        if let BankAccountAggregate::Opened(ref data) = aggregate {
+        if let BankAccountAggregate::Opened(ref data, _) = aggregate {
             if data.balance == 0 {
                 Ok(vec![BankAccountEvent::closed(self.id)])
             } else {
@@ -46,7 +46,7 @@ mod tests {
     #[test]
     fn closing_works() {
         // Arrange
-        let agg = BankAccountAggregate::Opened(BankAccountState::new(123, 5000));
+        let agg = BankAccountAggregate::Opened(BankAccountState::new(123, 5000), Vec::new());
         let cmd = CloseBankAccount::new(123);
         let expected_events = vec![BankAccountEvent::closed(123)];
 
@@ -60,7 +60,7 @@ mod tests {
     #[test]
     fn cant_close_account_that_has_funds() {
         // Arrange
-        let mut agg = BankAccountAggregate::Opened(BankAccountState::new(123, 5000));
+        let mut agg = BankAccountAggregate::Opened(BankAccountState::new(123, 5000), Vec::new());
         agg.apply(BankAccountEvent::credited(123, 20)).unwrap();
         let cmd = CloseBankAccount::new(123);
         let expected_events = vec![BankAccountEvent::closing_failed_due_to_funds_available(
