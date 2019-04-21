@@ -34,27 +34,39 @@ impl AggregateCommand<BankAccountAggregate> for DepositMoney {
 
 #[cfg(test)]
 mod tests {
+    use crate::bank::account::errors::CommandError;
     use crate::bank::account::prelude::{
         BankAccountAggregate, BankAccountEvent, BankAccountId, CustomerId, DepositMoney,
     };
     use eventsourcing::Aggregate;
+
     const ACCOUNT_ID: BankAccountId = 123;
     const CUSTOMER_ID: CustomerId = 5000;
 
     #[test]
     fn depositing_money_works() {
-        // Arrange
-        let mut agg = BankAccountAggregate::default();
-        agg.apply(BankAccountEvent::opened(ACCOUNT_ID, CUSTOMER_ID))
-            .unwrap();
-        let cmd = DepositMoney::new(ACCOUNT_ID, 49);
-        let expected_events = vec![BankAccountEvent::credited(ACCOUNT_ID, 49)];
-
-        // Act
-        let result = agg.execute(cmd).unwrap();
-
-        // Assert
-        assert_eq!(expected_events, result);
+        assert_deposit(
+            vec![BankAccountEvent::opened(ACCOUNT_ID, CUSTOMER_ID)],
+            DepositMoney::new(ACCOUNT_ID, 49),
+            Ok(vec![BankAccountEvent::credited(ACCOUNT_ID, 49)]),
+        );
     }
 
+    fn assert_deposit(
+        intitial_events: Vec<BankAccountEvent>,
+        cmd: DepositMoney,
+        expected: Result<Vec<BankAccountEvent>, CommandError>,
+    ) {
+        //Arrange
+        let mut agg = BankAccountAggregate::default();
+        for event in intitial_events {
+            agg.apply(event).unwrap();
+        }
+
+        // Act
+        let result = agg.execute(cmd);
+
+        // Assert
+        assert_eq!(expected, result);
+    }
 }

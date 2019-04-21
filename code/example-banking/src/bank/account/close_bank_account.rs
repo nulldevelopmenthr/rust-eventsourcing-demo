@@ -38,46 +38,53 @@ impl AggregateCommand<BankAccountAggregate> for CloseBankAccount {
 
 #[cfg(test)]
 mod tests {
+    use crate::bank::account::errors::CommandError;
     use crate::bank::account::prelude::{
         BankAccountAggregate, BankAccountEvent, BankAccountId, CloseBankAccount, CustomerId,
     };
     use eventsourcing::Aggregate;
+
     const ACCOUNT_ID: BankAccountId = 123;
     const CUSTOMER_ID: CustomerId = 5000;
 
     #[test]
     fn closing_works() {
-        // Arrange
-        let mut agg = BankAccountAggregate::default();
-        agg.apply(BankAccountEvent::opened(ACCOUNT_ID, CUSTOMER_ID))
-            .unwrap();
-        let cmd = CloseBankAccount::new(ACCOUNT_ID);
-        let expected_events = vec![BankAccountEvent::closed(ACCOUNT_ID)];
-
-        // Act
-        let result = agg.execute(cmd).unwrap();
-
-        // Assert
-        assert_eq!(expected_events, result);
+        assert_close(
+            vec![BankAccountEvent::opened(ACCOUNT_ID, CUSTOMER_ID)],
+            CloseBankAccount::new(ACCOUNT_ID),
+            Ok(vec![BankAccountEvent::closed(ACCOUNT_ID)]),
+        );
     }
 
     #[test]
     fn cant_close_account_that_has_funds() {
+        assert_close(
+            vec![
+                BankAccountEvent::opened(ACCOUNT_ID, CUSTOMER_ID),
+                BankAccountEvent::credited(ACCOUNT_ID, 20),
+            ],
+            CloseBankAccount::new(ACCOUNT_ID),
+            Ok(vec![
+                BankAccountEvent::closing_failed_due_to_funds_available(ACCOUNT_ID, 20),
+            ]),
+        );
+    }
+
+    fn assert_close(
+        intitial_events: Vec<BankAccountEvent>,
+        cmd: CloseBankAccount,
+        expected: Result<Vec<BankAccountEvent>, CommandError>,
+    ) {
         // Arrange
         let mut agg = BankAccountAggregate::default();
-        agg.apply(BankAccountEvent::opened(ACCOUNT_ID, CUSTOMER_ID))
-            .unwrap();
-        agg.apply(BankAccountEvent::credited(ACCOUNT_ID, 20))
-            .unwrap();
-        let cmd = CloseBankAccount::new(ACCOUNT_ID);
-        let expected_events = vec![BankAccountEvent::closing_failed_due_to_funds_available(
-            ACCOUNT_ID, 20,
-        )];
+        for event in intitial_events {
+            agg.apply(event).unwrap();
+        }
 
         // Act
-        let result = agg.execute(cmd).unwrap();
+        let result = agg.execute(cmd);
 
         // Assert
-        assert_eq!(expected_events, result);
+        assert_eq!(expected, result);
     }
 }

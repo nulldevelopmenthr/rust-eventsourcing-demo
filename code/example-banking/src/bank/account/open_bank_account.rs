@@ -83,31 +83,37 @@ mod tests {
 
     #[test]
     fn open_bank_account_works() {
-        // Arrange
-        let agg = BankAccountAggregate::default();
-        let cmd = OpenBankAccount::new(ACCOUNT_ID, CUSTOMER_ID);
-        let expected_events = vec![BankAccountEvent::opened(ACCOUNT_ID, CUSTOMER_ID)];
-
-        // Act
-        let result = agg.execute(cmd).unwrap();
-
-        // Assert
-        assert_eq!(expected_events, result);
+        assert_open(
+            vec![],
+            OpenBankAccount::new(ACCOUNT_ID, CUSTOMER_ID),
+            Ok(vec![BankAccountEvent::opened(ACCOUNT_ID, CUSTOMER_ID)]),
+        );
     }
 
     #[test]
     fn cant_open_already_opened_bank_account() {
+        assert_open(
+            vec![BankAccountEvent::opened(ACCOUNT_ID, CUSTOMER_ID)],
+            OpenBankAccount::new(ACCOUNT_ID, CUSTOMER_ID),
+            Err(CommandError::AlreadyCreated),
+        );
+    }
+
+    fn assert_open(
+        intitial_events: Vec<BankAccountEvent>,
+        cmd: OpenBankAccount,
+        expected: Result<Vec<BankAccountEvent>, CommandError>,
+    ) {
         // Arrange
         let mut agg = BankAccountAggregate::default();
-        agg.apply(BankAccountEvent::opened(ACCOUNT_ID, CUSTOMER_ID))
-            .unwrap();
-        let cmd = OpenBankAccount::new(ACCOUNT_ID, CUSTOMER_ID);
-        let expected_error = Err(CommandError::AlreadyCreated);
+        for event in intitial_events {
+            agg.apply(event).unwrap();
+        }
 
         // Act
         let result = agg.execute(cmd);
 
         // Assert
-        assert_eq!(expected_error, result);
+        assert_eq!(expected, result);
     }
 }
