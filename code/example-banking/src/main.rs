@@ -55,7 +55,8 @@ fn open_bank_account_example2() {
 
 fn deposit_example() {
     // Arrange
-    let mut agg = BankAccountAggregate::Opened(BankAccountState::new(123, 5000), Vec::new());
+    let mut agg = BankAccountAggregate::default();
+    agg.apply(BankAccountEvent::opened(123, 5000)).unwrap();
     let cmd = DepositMoney::new(123, 49);
     let expected_balance = 49;
 
@@ -76,7 +77,8 @@ fn deposit_example() {
 
 fn withdraw_example() {
     // Arrange
-    let mut agg = BankAccountAggregate::Opened(BankAccountState::new(123, 5000), Vec::new());
+    let mut agg = BankAccountAggregate::default();
+    agg.apply(BankAccountEvent::opened(123, 5000)).unwrap();
     agg.apply(BankAccountEvent::credited(123, 50)).unwrap();
     let cmd = WithdrawMoney::new(123, 49);
     let expected_balance = 1;
@@ -98,7 +100,8 @@ fn withdraw_example() {
 
 fn not_enough_funds_example() {
     // Arrange
-    let mut agg = BankAccountAggregate::Opened(BankAccountState::new(123, 5000), Vec::new());
+    let mut agg = BankAccountAggregate::default();
+    agg.apply(BankAccountEvent::opened(123, 5000)).unwrap();
     let cmd = WithdrawMoney::new(123, 49);
     let expected_balance = 0;
 
@@ -120,7 +123,8 @@ fn not_enough_funds_example() {
 
 fn close_example() {
     // Arrange
-    let mut agg = BankAccountAggregate::Opened(BankAccountState::new(123, 5000), Vec::new());
+    let mut agg = BankAccountAggregate::default();
+    agg.apply(BankAccountEvent::opened(123, 5000)).unwrap();
     let cmd = CloseBankAccount::new(123);
     let expected_balance = 0;
 

@@ -39,16 +39,20 @@ impl AggregateCommand<BankAccountAggregate> for CloseBankAccount {
 #[cfg(test)]
 mod tests {
     use crate::bank::account::prelude::{
-        BankAccountAggregate, BankAccountEvent, BankAccountState, CloseBankAccount,
+        BankAccountAggregate, BankAccountEvent, BankAccountId, CloseBankAccount, CustomerId,
     };
     use eventsourcing::Aggregate;
+    const ACCOUNT_ID: BankAccountId = 123;
+    const CUSTOMER_ID: CustomerId = 5000;
 
     #[test]
     fn closing_works() {
         // Arrange
-        let agg = BankAccountAggregate::Opened(BankAccountState::new(123, 5000), Vec::new());
-        let cmd = CloseBankAccount::new(123);
-        let expected_events = vec![BankAccountEvent::closed(123)];
+        let mut agg = BankAccountAggregate::default();
+        agg.apply(BankAccountEvent::opened(ACCOUNT_ID, CUSTOMER_ID))
+            .unwrap();
+        let cmd = CloseBankAccount::new(ACCOUNT_ID);
+        let expected_events = vec![BankAccountEvent::closed(ACCOUNT_ID)];
 
         // Act
         let result = agg.execute(cmd).unwrap();
@@ -60,11 +64,14 @@ mod tests {
     #[test]
     fn cant_close_account_that_has_funds() {
         // Arrange
-        let mut agg = BankAccountAggregate::Opened(BankAccountState::new(123, 5000), Vec::new());
-        agg.apply(BankAccountEvent::credited(123, 20)).unwrap();
-        let cmd = CloseBankAccount::new(123);
+        let mut agg = BankAccountAggregate::default();
+        agg.apply(BankAccountEvent::opened(ACCOUNT_ID, CUSTOMER_ID))
+            .unwrap();
+        agg.apply(BankAccountEvent::credited(ACCOUNT_ID, 20))
+            .unwrap();
+        let cmd = CloseBankAccount::new(ACCOUNT_ID);
         let expected_events = vec![BankAccountEvent::closing_failed_due_to_funds_available(
-            123, 20,
+            ACCOUNT_ID, 20,
         )];
 
         // Act

@@ -35,16 +35,20 @@ impl AggregateCommand<BankAccountAggregate> for DepositMoney {
 #[cfg(test)]
 mod tests {
     use crate::bank::account::prelude::{
-        BankAccountAggregate, BankAccountEvent, BankAccountState, DepositMoney,
+        BankAccountAggregate, BankAccountEvent, BankAccountId, CustomerId, DepositMoney,
     };
     use eventsourcing::Aggregate;
+    const ACCOUNT_ID: BankAccountId = 123;
+    const CUSTOMER_ID: CustomerId = 5000;
 
     #[test]
     fn depositing_money_works() {
         // Arrange
-        let agg = BankAccountAggregate::Opened(BankAccountState::new(123, 5000), Vec::new());
-        let cmd = DepositMoney::new(123, 49);
-        let expected_events = vec![BankAccountEvent::credited(123, 49)];
+        let mut agg = BankAccountAggregate::default();
+        agg.apply(BankAccountEvent::opened(ACCOUNT_ID, CUSTOMER_ID))
+            .unwrap();
+        let cmd = DepositMoney::new(ACCOUNT_ID, 49);
+        let expected_events = vec![BankAccountEvent::credited(ACCOUNT_ID, 49)];
 
         // Act
         let result = agg.execute(cmd).unwrap();

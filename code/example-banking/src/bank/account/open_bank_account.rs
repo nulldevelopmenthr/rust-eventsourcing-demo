@@ -71,18 +71,22 @@ impl AggregateCommand<BankAccountAggregate> for OpenBankAccount {
 
 #[cfg(test)]
 mod tests {
+
     use crate::bank::account::errors::CommandError;
     use crate::bank::account::prelude::{
-        BankAccountAggregate, BankAccountEvent, BankAccountState, OpenBankAccount,
+        BankAccountAggregate, BankAccountEvent, BankAccountId, CustomerId, OpenBankAccount,
     };
     use eventsourcing::Aggregate;
+
+    const ACCOUNT_ID: BankAccountId = 123;
+    const CUSTOMER_ID: CustomerId = 5000;
 
     #[test]
     fn open_bank_account_works() {
         // Arrange
         let agg = BankAccountAggregate::default();
-        let cmd = OpenBankAccount::new(123, 5000);
-        let expected_events = vec![BankAccountEvent::opened(123, 5000)];
+        let cmd = OpenBankAccount::new(ACCOUNT_ID, CUSTOMER_ID);
+        let expected_events = vec![BankAccountEvent::opened(ACCOUNT_ID, CUSTOMER_ID)];
 
         // Act
         let result = agg.execute(cmd).unwrap();
@@ -94,8 +98,10 @@ mod tests {
     #[test]
     fn cant_open_already_opened_bank_account() {
         // Arrange
-        let agg = BankAccountAggregate::Opened(BankAccountState::new(123, 5000), Vec::new());
-        let cmd = OpenBankAccount::new(123, 5000);
+        let mut agg = BankAccountAggregate::default();
+        agg.apply(BankAccountEvent::opened(ACCOUNT_ID, CUSTOMER_ID))
+            .unwrap();
+        let cmd = OpenBankAccount::new(ACCOUNT_ID, CUSTOMER_ID);
         let expected_error = Err(CommandError::AlreadyCreated);
 
         // Act

@@ -223,22 +223,26 @@ impl AggregateEvent<BankAccountAggregate> for ClosingFailedDueToFundsAvailable {
 #[cfg(test)]
 mod tests {
     use crate::bank::account::errors::EventError;
-    use crate::bank::account::prelude::{BankAccountAggregate, BankAccountEvent, BankAccountState};
+    use crate::bank::account::prelude::{
+        BankAccountAggregate, BankAccountEvent, BankAccountId, CustomerId,
+    };
     use eventsourcing::Aggregate;
+    const ACCOUNT_ID: BankAccountId = 123;
+    const CUSTOMER_ID: CustomerId = 5000;
 
     #[test]
     fn bank_account_opened() {
         // Arrange
         let mut agg = BankAccountAggregate::default();
-        let event = BankAccountEvent::opened(123, 5000);
+        let event = BankAccountEvent::opened(ACCOUNT_ID, CUSTOMER_ID);
 
         // Act
         agg.apply(event).unwrap();
 
         // Assert
         if let BankAccountAggregate::Opened(state, _) = agg {
-            assert_eq!(123, state.id);
-            assert_eq!(5000, state.customer_id);
+            assert_eq!(ACCOUNT_ID, state.id);
+            assert_eq!(CUSTOMER_ID, state.customer_id);
             assert_eq!(0, state.balance);
         } else {
             panic!("Aggregate not in Opened state");
@@ -248,8 +252,10 @@ mod tests {
     #[test]
     fn throws_error_if_opening_an_opened_account() {
         // Arrange
-        let mut agg = BankAccountAggregate::Opened(BankAccountState::new(123, 5000), Vec::new());
-        let event = BankAccountEvent::opened(123, 5000);
+        let mut agg = BankAccountAggregate::default();
+        agg.apply(BankAccountEvent::opened(ACCOUNT_ID, CUSTOMER_ID))
+            .unwrap();
+        let event = BankAccountEvent::opened(ACCOUNT_ID, CUSTOMER_ID);
         let expected_error = Err(EventError::AlreadyOpened);
 
         // Act
@@ -262,8 +268,10 @@ mod tests {
     #[test]
     fn bank_account_credited() {
         // Arrange
-        let mut agg = BankAccountAggregate::Opened(BankAccountState::new(123, 5000), Vec::new());
-        let event = BankAccountEvent::credited(123, 49);
+        let mut agg = BankAccountAggregate::default();
+        agg.apply(BankAccountEvent::opened(ACCOUNT_ID, CUSTOMER_ID))
+            .unwrap();
+        let event = BankAccountEvent::credited(ACCOUNT_ID, 49);
         let expected_balance = 49;
 
         // Act
@@ -280,10 +288,12 @@ mod tests {
     #[test]
     fn bank_account_debited() {
         // Arrange
-        let mut agg = BankAccountAggregate::Opened(BankAccountState::new(123, 5000), Vec::new());
+        let mut agg = BankAccountAggregate::default();
+        agg.apply(BankAccountEvent::opened(ACCOUNT_ID, CUSTOMER_ID))
+            .unwrap();
         let events = vec![
-            BankAccountEvent::credited(123, 49),
-            BankAccountEvent::debited(123, 48),
+            BankAccountEvent::credited(ACCOUNT_ID, 49),
+            BankAccountEvent::debited(ACCOUNT_ID, 48),
         ];
         let expected_balance = 1;
 
@@ -303,8 +313,10 @@ mod tests {
     #[test]
     fn bank_account_not_enough_funds() {
         // Arrange
-        let mut agg = BankAccountAggregate::Opened(BankAccountState::new(123, 5000), Vec::new());
-        let event = BankAccountEvent::not_enough_funds(123, 49, 0);
+        let mut agg = BankAccountAggregate::default();
+        agg.apply(BankAccountEvent::opened(ACCOUNT_ID, CUSTOMER_ID))
+            .unwrap();
+        let event = BankAccountEvent::not_enough_funds(ACCOUNT_ID, 49, 0);
         let expected_balance = 0;
 
         // Act
@@ -321,8 +333,10 @@ mod tests {
     #[test]
     fn closing_bank_account() {
         // Arrange
-        let mut agg = BankAccountAggregate::Opened(BankAccountState::new(123, 5000), Vec::new());
-        let event = BankAccountEvent::closed(123);
+        let mut agg = BankAccountAggregate::default();
+        agg.apply(BankAccountEvent::opened(ACCOUNT_ID, CUSTOMER_ID))
+            .unwrap();
+        let event = BankAccountEvent::closed(ACCOUNT_ID);
         let expected_balance = 0;
 
         // Act
@@ -339,10 +353,12 @@ mod tests {
     #[test]
     fn closing_not_possible_due_to_funds_available() {
         // Arrange
-        let mut agg = BankAccountAggregate::Opened(BankAccountState::new(123, 5000), Vec::new());
+        let mut agg = BankAccountAggregate::default();
+        agg.apply(BankAccountEvent::opened(ACCOUNT_ID, CUSTOMER_ID))
+            .unwrap();
         let events = vec![
-            BankAccountEvent::credited(123, 49),
-            BankAccountEvent::closing_failed_due_to_funds_available(123, 49),
+            BankAccountEvent::credited(ACCOUNT_ID, 49),
+            BankAccountEvent::closing_failed_due_to_funds_available(ACCOUNT_ID, 49),
         ];
         let expected_balance = 49;
 

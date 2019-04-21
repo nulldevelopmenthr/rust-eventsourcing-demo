@@ -42,17 +42,22 @@ impl AggregateCommand<BankAccountAggregate> for WithdrawMoney {
 #[cfg(test)]
 mod tests {
     use crate::bank::account::prelude::{
-        BankAccountAggregate, BankAccountEvent, BankAccountState, WithdrawMoney,
+        BankAccountAggregate, BankAccountEvent, BankAccountId, CustomerId, WithdrawMoney,
     };
     use eventsourcing::Aggregate;
+    const ACCOUNT_ID: BankAccountId = 123;
+    const CUSTOMER_ID: CustomerId = 5000;
 
     #[test]
     fn withdrawing_money_works() {
         // Arrange
-        let mut agg = BankAccountAggregate::Opened(BankAccountState::new(123, 5000), Vec::new());
-        agg.apply(BankAccountEvent::credited(123, 50)).unwrap();
-        let cmd = WithdrawMoney::new(123, 49);
-        let expected_events = vec![BankAccountEvent::debited(123, 49)];
+        let mut agg = BankAccountAggregate::default();
+        agg.apply(BankAccountEvent::opened(ACCOUNT_ID, CUSTOMER_ID))
+            .unwrap();
+        agg.apply(BankAccountEvent::credited(ACCOUNT_ID, 50))
+            .unwrap();
+        let cmd = WithdrawMoney::new(ACCOUNT_ID, 49);
+        let expected_events = vec![BankAccountEvent::debited(ACCOUNT_ID, 49)];
 
         // Act
         let result = agg.execute(cmd).unwrap();
@@ -64,10 +69,13 @@ mod tests {
     #[test]
     fn not_enough_funds() {
         // Arrange
-        let mut agg = BankAccountAggregate::Opened(BankAccountState::new(123, 5000), Vec::new());
-        agg.apply(BankAccountEvent::credited(123, 48)).unwrap();
-        let cmd = WithdrawMoney::new(123, 49);
-        let expected_events = vec![BankAccountEvent::not_enough_funds(123, 49, 48)];
+        let mut agg = BankAccountAggregate::default();
+        agg.apply(BankAccountEvent::opened(ACCOUNT_ID, CUSTOMER_ID))
+            .unwrap();
+        agg.apply(BankAccountEvent::credited(ACCOUNT_ID, 48))
+            .unwrap();
+        let cmd = WithdrawMoney::new(ACCOUNT_ID, 49);
+        let expected_events = vec![BankAccountEvent::not_enough_funds(ACCOUNT_ID, 49, 48)];
 
         // Act
         let result = agg.execute(cmd).unwrap();
